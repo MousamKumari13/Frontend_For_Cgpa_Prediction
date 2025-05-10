@@ -80,40 +80,42 @@ form.addEventListener('submit', (e) => {
     loadQuestion();
   } else {
     form.classList.add('hidden');
+    prevBtn.classList.add('hidden');
+   emojiDisplay.innerHTML = `
+  <div class="loading-emoji"><span class="rotate">⌛</span></div>
+`;
+    cgpaDisplay.textContent = " Predicting your CGPA...";
+    resultContainer.classList.remove('hidden');
 
-    fetch('https://student-score-predictor-ml-project.onrender.com/predict', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data && data.prediction) {
-        const prediction = parseFloat(data.prediction);
-        let emoji = "😔";
-        let message = "Don't worry, stay consistent and improve!";
+    // Delay fetch to allow UI to render loading state
+    setTimeout(() => {
+      fetch('https://student-cgpa-predictor-backend.onrender.com/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+        .then(res => res.json())
+        .then(data => {
+          const prediction = parseFloat(data.prediction);
+          let emoji = "😔", message = "Don't worry, stay consistent and improve!";
 
-        if (prediction > 8) {
-          emoji = "🎉😁";
-          message = "Amazing! You're doing great!";
-        } else if (prediction >= 7) {
-          emoji = "🙂";
-          message = "Good! Keep pushing a bit more.";
-        }
+          if (prediction > 8) {
+            emoji = "🎉😁";
+            message = "Amazing! You're doing great!";
+          } else if (prediction >= 7) {
+            emoji = "🙂";
+            message = "Good! Keep pushing a bit more.";
+          }
 
-        resultContainer.classList.remove('hidden');
-        emojiDisplay.innerHTML = `<div style="font-size: 5rem; margin-bottom: 10px;">${emoji}</div>`;
-        cgpaDisplay.textContent = `Your predicted CGPA: ${prediction.toFixed(2)} — ${message}`;
-        prevBtn.classList.add('hidden');
-        homeBtn.classList.remove('hidden');
-      } else {
-        alert('Prediction not found or incorrect response from backend.');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Something went wrong!');
-    });
+          emojiDisplay.innerHTML = `<div style="font-size: 5rem;">${emoji}</div>`;
+          cgpaDisplay.textContent = `Your predicted CGPA: ${prediction.toFixed(2)} — ${message}`;
+          homeBtn.classList.remove('hidden');
+        })
+        .catch(err => {
+          cgpaDisplay.textContent = "⚠️ Something went wrong!";
+          console.error(err);
+        });
+    }, 1000); // slight delay for smooth rendering
   }
 });
 
