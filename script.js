@@ -89,7 +89,7 @@ form.addEventListener('submit', (e) => {
 
     // Delay fetch to allow UI to render loading state
     setTimeout(() => {
-      fetch('https://student-cgpa-predictor-backend.onrender.com/predict', {
+      fetch('https://student-cgpa-predictor-backend-1.onrender.com/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
